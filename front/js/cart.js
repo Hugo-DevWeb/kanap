@@ -1,6 +1,8 @@
-// Je récupère le tableau de panier en JS
+
+
+// Je récupère le tableau de panier en objet JS
 const cartBloc = JSON.parse(localStorage.cart);
-console.log(cartBloc);
+
 
 // Fonction d'ajout d'éléments enfants
 append = (parent, enfant) => {
@@ -25,7 +27,6 @@ createCart = (element) => {
 };
 // je crée un tableau des articles present 
 const tabArticles = document.getElementsByTagName('article');
-console.log(tabArticles);
 let nbArticle = tabArticles.length;
 
 
@@ -107,8 +108,6 @@ createDeleteBloc = (name, color,  index) => {
     let para = document.createElement('p');
     para.innerText = "Supprimer";
     para.classList.add('deleteItem');
-    para.setAttribute('data-id', name)
-    para.setAttribute('data-color', color)
     deleteBloc[index].append(para);
 }
 
@@ -140,9 +139,6 @@ showTotalQuantity = () => {
 
 
 
-console.log(totalQuantity);
-console.log(totalPrice);
-
 
 
 
@@ -172,44 +168,19 @@ showTotalQuantity();
  const deleteItems = document.getElementsByClassName('deleteItem');
 const articleList = document.getElementsByClassName('cart__item');
 
-getArticleAttribute = () =>{
-     for ( let article of articleList){
-         const articleAttribute = article.getAttribute('data-id');
-         console.log(articleAttribute);
-         return articleAttribute;
-
-     }
-    
- }
- getDeleteAttribute = () =>{
-    for(let item of deleteItems){
-       const itemAttribute = item.getAttribute('data-id');
-       console.log(itemAttribute);
-       return itemAttribute;
-    }
-     
- }
-
-
-console.log(cartBloc);
-
+// Si quantité modifié modification ajouté a la page et au localStorage
 changeQuantity = () => {
     const selectorQuantity = document.querySelectorAll('.itemQuantity');
-    console.log(selectorQuantity);
     for (let quantity of selectorQuantity){
         quantity.addEventListener('change', function(){
             let value = quantity.value;
             let parent = quantity.closest('article').getAttribute('data-id');
-            console.log(value);
-            console.log(parent);
 
             for (let bloc of cartBloc){
                 if(bloc.id == parent){
                     
                     bloc.quantity = value;
-                    console.log(bloc);
                     localStorage.cart = JSON.stringify(cartBloc);
-                    console.log(cartBloc);
                     location.reload();
                 }
             }
@@ -219,7 +190,7 @@ changeQuantity = () => {
 
 
 changeQuantity();
-
+// Si produit supprimé suppression effectué sur la page et dans le localStorage 
 deleteButton = () => {
    const deleteButtons = document.querySelectorAll('.deleteItem');
    for (let deleteButton of deleteButtons){
@@ -243,7 +214,7 @@ deleteButton = () => {
 
 deleteButton();
 
-
+// récuperation des éléments de formulaire
 const firstName = document.getElementById('firstName');
 const firstNameError = document.getElementById ('firstNameErrorMsg');
 const lastName = document.getElementById('lastName');
@@ -255,127 +226,75 @@ const cityError = document.getElementById('cityErrorMsg');
 const mail = document.getElementById('email');
 const mailError = document.getElementById('emailErrorMsg');
 const validOrder = document.getElementById('order');
-
-const customers = [];
-let customer = {
-    // firstName: "",
-    // lastName: "",
-    // address: "",
-    // city: "",
-    // mail: "",
-    // order: [],
-
-}
+const form = document.querySelector('form');
+// Création des différentes reggex 
 let nameReggex = /^[a-z ,.'-]+$/i;
 let addressReggex = /^(\d+) ?([A-Za-z](?= ))? (.*?) ([^ ]+?) ?((?<= )APT)? ?((?<= )\d*)?$/
 let emailReggex = /^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9.-_]+[.]{1}[a-z]{2,10}$/;
-const form = document.querySelector('form');
 
+// Contrôle de la valeur des input et implémantation message d'erreur 
 controlInput = (input, reggex, error) =>{
     input.addEventListener('change', function(){
         if(reggex.test(this.value)){
-            Object.defineProperty(customer, input.name, {
-                   value: this.value,
-                   configurable: true,
-                   writable: true
-            });
-            console.log(customer);
             error.innerText= "";
+            return true;
         } else {
             error.innerText = "Champ invalide" 
+            return false;
         }
        
     })
 }
-
-
 controlInput(form.firstName, nameReggex, firstNameError);
 controlInput(form.lastName, nameReggex, lastNameError);
 controlInput(form.address, addressReggex, addressError);
 controlInput(form.city, nameReggex, cityError);
 controlInput(form.email, emailReggex, mailError);
-console.log(customer);
 
-
-// à partir d'ici j'ai un objet customer qui contient toute les données du client
-
-
-console.log(localStorage);
-
-// Lors du clique sur le submit j'ajoute un tableau des produit à l'objet client
-
+// Validation de commande et envoi de l'objet Customer via l'api, ouverture de la page confirmation 
 validOrder.addEventListener('click', function(e){
     e.preventDefault();
-    // Object.defineProperty(customer, "order", {
-    //     value: cartBloc
-    // })
-    console.log(customer);
-    cartBloc.push(customer);
-    
-    // le console.log m'affiche bien mon customer avec toute les infos et mon tableau customers
-    // avec l'objet dedans 
-    if(cartBloc.length > 1){
-        const newCart = [];
-        console.log(cartBloc);
-        let orderBloc = newCart.concat(cartBloc);
-        console.log(orderBloc);
-        localStorage.order = orderBloc;
-        console.log(localStorage.order);
-        // le code si dessous s'execute mais retourne un tableau avec un objet vide
-        
+    if(controlInput(form.firstName, nameReggex, firstNameError) ||
+       controlInput(form.lastName, nameReggex, lastNameError) ||
+       controlInput(form.address, addressReggex, addressError) ||
+       controlInput(form.city, nameReggex, cityError) ||
+       controlInput(form.email, emailReggex, mailError) == false){
+        console.log("error");
+    } else { 
+        let products = [];
+        for(item of cartBloc){
+            products.push(item.id);
+            console.log(products);
+        } 
+        const Customer = {
+            contact: {
+                firstName: document.getElementById("firstName").value,
+                lastName: document.getElementById("lastName").value,
+                address: document.getElementById("address").value,
+                city: document.getElementById("city").value,
+                email: document.getElementById("email").value,
+            },
+            products: products,
+        }
+        console.log(Customer);
+        if( products.length == 0){
+            let productError = alert ('Votre panier est vide !');
+            return productError; 
+        }
+        fetch("http://localhost:3000/api/products/order", {
+            method: "POST",
+            body: JSON.stringify(Customer),
+            headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            },
+        })
+            .then(res => res.json())
+            .then(res => {
+                document.location.href = "confirmation.html?orderId=" + res.orderId;
+            })
 
-    } else {
-        console.log("erreur");
+    };
         
-    }
-    
-    // window.location.href= "confirmation.html";
 })
-    
-
-
-
-console.log(localStorage.cart);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
