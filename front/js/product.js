@@ -17,6 +17,7 @@ localStorage.id = id;
 // Variable nécéssaire aux fonctions 
 let quantity = 0;
 let color = null; 
+let priceValue = 0;
 
 
 // Récupération des données produits en fonction de l'id 
@@ -58,7 +59,7 @@ titleInsert = (name) =>{
 } ;   
 // Insertion du prix du produit  
 priceInsert = (prix) =>{
-    localStorage.prix = prix;
+    priceValue = prix;
     return price.innerHTML = prix;
    
 };
@@ -84,7 +85,12 @@ append = (parent, enfant)=>{
 
 // Récuperation du nombre de produit commandé 
 number.addEventListener('change', setNumber = () =>{
-    quantity = number.value;
+    if(number.value > 0 && number.value < 101){
+        quantity = number.value;
+    } else {
+        alert ('Quantité non valide');
+    }
+    
 });
 // Récupération de la couleur choisie
 colors.addEventListener('change', selected = () =>{
@@ -117,7 +123,7 @@ validate.addEventListener('click', openCart = () =>{
        const product = {
             nom : localStorage.name,
             color : color,
-            prix : localStorage.prix,
+            prix : priceValue,
             quantity : quantity,
             id : localStorage.id,
             img : localStorage.image,
